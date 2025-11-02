@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/areaRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp">
+
+    <ImageView
+        android:id="@+id/mapImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:src="@drawable/city_1000" />
+
+    <com.example.app.RectOverlayView
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingTop="12dp">
+
+        <TextView
+            android:id="@+id/coordsLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select points: upper left, down right"
+            android:textSize="14sp"
+            android:textColor="#555" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmArea"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:background="@drawable/rounded_button_green"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp"
+            android:text="Send selection"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:backgroundTint="@null"
+            app:cornerRadius="26dp"
+            app:rippleColor="@android:color/white" />
+    </LinearLayout>
+
+</FrameLayout>

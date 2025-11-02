@@ -21,7 +21,6 @@
         app:tabTextAppearance="@style/TabTextLarge"
         app:tabTextColor="@color/common_google_signin_btn_text_light" />
 
-    <!-- PUSTY kontener na fragmenty -->
     <FrameLayout
         android:id="@+id/tabsContent"
         android:layout_width="0dp"
