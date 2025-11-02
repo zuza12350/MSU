@@ -46,43 +46,35 @@ public class PixelsFragment extends Fragment {
                 com.google.android.material.R.color.design_default_color_background
         );
 
-        // 🔹 przycisk od początku klikalny
         binding.btnSendPixels.setEnabled(true);
-        // startowy wygląd – „wyszarzony”
         binding.btnSendPixels.setAlpha(0.5f);
 
-        // 🔹 obserwacja zmian w polach
         TextWatcher watcher = new SimpleWatcher(this::updateButtonStyle);
         binding.x1Val.addTextChangedListener(watcher);
         binding.y1Val.addTextChangedListener(watcher);
         binding.x2Val.addTextChangedListener(watcher);
         binding.y2Val.addTextChangedListener(watcher);
 
-        // 🔹 klik zawsze działa (walidacja decyduje co dalej)
         binding.btnSendPixels.setOnClickListener(this::onSendClicked);
     }
 
-    /** 🔸 Zmienia tylko wizualnie przycisk (szary / aktywny) */
     private void updateButtonStyle() {
         boolean allFilled = allFieldsFilled();
         binding.btnSendPixels.setAlpha(allFilled ? 1f : 0.5f);
-        // UWAGA: nie zmieniamy enabled, bo ma być zawsze klikalny
     }
 
-    /** 🔸 Obsługa kliknięcia */
     private void onSendClicked(View view) {
         boolean allFilled = allFieldsFilled();
 
         if (!allFilled) {
             highlightEmptyFields();
-            Toast.makeText(requireContext(), "Uzupełnij wszystkie pola", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "All fields must be filled", Toast.LENGTH_SHORT).show();
             return;
         }
 
         validateFields();
     }
 
-    /** 🔸 Sprawdza czy wszystkie pola niepuste */
     private boolean allFieldsFilled() {
         return notEmpty(binding.x1Val)
                 && notEmpty(binding.y1Val)
@@ -90,12 +82,11 @@ public class PixelsFragment extends Fragment {
                 && notEmpty(binding.y2Val);
     }
 
-    /** 🔸 Podświetla puste pola */
     private void highlightEmptyFields() {
         EditText[] fields = {binding.x1Val, binding.y1Val, binding.x2Val, binding.y2Val};
         for (EditText f : fields) {
             if (!notEmpty(f)) {
-                f.setError("Wymagane pole");
+                f.setError("Must be filled");
                 f.setBackgroundTintList(ERROR_TINT);
             } else {
                 f.setError(null);
@@ -104,7 +95,6 @@ public class PixelsFragment extends Fragment {
         }
     }
 
-    /** 🔸 Walidacja i akcja */
     private void validateFields() {
         Double x1 = parseNumber(binding.x1Val.getText().toString());
         Double y1 = parseNumber(binding.y1Val.getText().toString());
@@ -127,7 +117,6 @@ public class PixelsFragment extends Fragment {
         clearAllFields();
     }
 
-    /** 🔸 Czyści pola i wraca do „szarego” przycisku */
     private void clearAllFields() {
         EditText[] fields = {binding.x1Val, binding.y1Val, binding.x2Val, binding.y2Val};
         for (EditText f : fields) {
@@ -138,7 +127,6 @@ public class PixelsFragment extends Fragment {
         binding.btnSendPixels.setAlpha(0.5f);
     }
 
-    /** 🔸 Pomocnicze funkcje */
     private boolean notEmpty(EditText e) {
         CharSequence cs = e.getText();
         return cs != null && cs.toString().trim().length() > 0;

@@ -27,7 +27,6 @@ public class CoordinatesFragment extends Fragment {
 
     private LayoutCoordinatesBinding binding;
 
-    // ===== przeniesione stałe i pola =====
     private static final Pattern COORD_PATTERN = Pattern.compile("^-?\\d{1,2}[.,]\\d{1,5}$");
     private ColorStateList normalTint;
     private static final ColorStateList ERROR_TINT = ColorStateList.valueOf(Color.RED);
@@ -44,28 +43,23 @@ public class CoordinatesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // domyślny kolor tła pól
         normalTint = ContextCompat.getColorStateList(
                 requireContext(),
                 com.google.android.material.R.color.design_default_color_background
         );
 
-        // przycisk na start nieaktywny
         binding.btnSendCoordinates.setEnabled(false);
         binding.btnSendCoordinates.setAlpha(.5f);
 
-        // reaguj na zmiany w polach
         TextWatcher watcher = new SimpleWatcher(this::toggleButtonEnabled);
         binding.latitudeVal.addTextChangedListener(watcher);
         binding.longitudeVal.addTextChangedListener(watcher);
         binding.latitudeLeftVal.addTextChangedListener(watcher);
         binding.longitudeLeftVal.addTextChangedListener(watcher);
 
-        // walidacja i „wysyłka”
         binding.btnSendCoordinates.setOnClickListener(this::validateFields);
     }
 
-    // ===== logika walidacji (jak w aktywności, dostosowana do fragmentu) =====
     private void validateFields(View view) {
         boolean okRightLat = validateField(binding.latitudeVal);
         boolean okRightLon = validateField(binding.longitudeVal);
@@ -93,7 +87,7 @@ public class CoordinatesFragment extends Fragment {
                 rLat, rLon, lLat, lLon);
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
 
-        // TODO: tutaj wywołaj repo/endpoint
+        // TODO: send to endpoint
         clearAllFields();
     }
 
