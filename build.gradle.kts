@@ -26,6 +26,7 @@ android {
                 "proguard-rules.pro"
             )
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -37,6 +38,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.code.ksoap2-android:ksoap2-android:3.6.2")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)

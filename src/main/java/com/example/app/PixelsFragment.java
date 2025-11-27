@@ -3,7 +3,6 @@ package com.example.app;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +18,10 @@ import androidx.fragment.app.Fragment;
 import com.example.app.databinding.LayoutPixelsBinding;
 import com.example.app.utils.SimpleWatcher;
 
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
@@ -109,12 +112,43 @@ public class PixelsFragment extends Fragment {
 
         if (!valid) return;
 
-        String msg = String.format(Locale.getDefault(),
-                "First corner: x1=%.1f, y1=%.1f\nSecond corner: x2=%.1f, y2=%.1f",
-                x1, y1, x2, y2);
+        String msg =   sendSoapRequest(x1, y1, x2, y2);
+//        String msg = String.format(Locale.getDefault(),
+//                "First corner: x1=%.1f, y1=%.1f\nSecond corner: x2=%.1f, y2=%.1f",
+//                x1, y1, x2, y2);
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
 
         clearAllFields();
+    }
+
+    public String sendSoapRequest(double x1, double y1, double x2, double y2) {
+        String NAMESPACE = "http://some.com/service/";
+        String METHOD_NAME = "GetInitialMap";
+        String SOAP_ACTION = NAMESPACE + METHOD_NAME;
+        String URL = "http://cutmap-api.azurewebsites.net/ServiceCityMap";
+
+        try {
+            var request = new SoapObject(NAMESPACE, METHOD_NAME);
+            request.addProperty("X1", x1);
+            request.addProperty("Y1", y1);
+            request.addProperty("X2", x2);
+            request.addProperty("Y2", y2);
+
+            SoapSerializationEnvelope envelope =
+                    new SoapSerializationEnvelope(SoapEnvelope.VER11);
+            envelope.dotNet = true;
+            envelope.setOutputSoapObject(request);
+
+            HttpTransportSE httpTransport = new HttpTransportSE(URL);
+
+            httpTransport.call(SOAP_ACTION, envelope);
+
+            Object response = envelope.getResponse();
+            return response.toString();
+
+        } catch (Exception e) {
+            return "ERROR: " + e.toString();
+        }
     }
 
     private void clearAllFields() {
