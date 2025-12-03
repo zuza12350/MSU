@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +17,18 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.app.databinding.LayoutPixelsBinding;
+import com.example.app.utils.CityMapService;
 import com.example.app.utils.SimpleWatcher;
 
 import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class PixelsFragment extends Fragment {
@@ -99,10 +104,10 @@ public class PixelsFragment extends Fragment {
     }
 
     private void validateFields() {
-        Double x1 = parseNumber(binding.x1Val.getText().toString());
-        Double y1 = parseNumber(binding.y1Val.getText().toString());
-        Double x2 = parseNumber(binding.x2Val.getText().toString());
-        Double y2 = parseNumber(binding.y2Val.getText().toString());
+        Integer x1 = parseNumber(binding.x1Val.getText().toString());
+        Integer y1 = parseNumber(binding.y1Val.getText().toString());
+        Integer x2 = parseNumber(binding.x2Val.getText().toString());
+        Integer y2 = parseNumber(binding.y2Val.getText().toString());
 
         boolean valid = true;
         valid &= checkRange(binding.x1Val, x1, 0, 1000, "x1: 0–1000");
@@ -112,45 +117,19 @@ public class PixelsFragment extends Fragment {
 
         if (!valid) return;
 
-        String msg =   sendSoapRequest(x1, y1, x2, y2);
-//        String msg = String.format(Locale.getDefault(),
-//                "First corner: x1=%.1f, y1=%.1f\nSecond corner: x2=%.1f, y2=%.1f",
-//                x1, y1, x2, y2);
-        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+        new Thread(() -> {
+            String msg = CityMapService
+                    .getInstance()
+                    .getFragmentOfMap(x1, y1, x2, y2);
 
-        clearAllFields();
+            System.out.println("MESSAGE " + msg);
+
+            requireActivity().runOnUiThread(() -> {
+                Log.d("SOAP", msg);
+                clearAllFields();
+            });
+        }).start();
     }
-
-    public String sendSoapRequest(double x1, double y1, double x2, double y2) {
-        String NAMESPACE = "http://some.com/service/";
-        String METHOD_NAME = "GetInitialMap";
-        String SOAP_ACTION = NAMESPACE + METHOD_NAME;
-        String URL = "http://cutmap-api.azurewebsites.net/ServiceCityMap";
-
-        try {
-            var request = new SoapObject(NAMESPACE, METHOD_NAME);
-            request.addProperty("X1", x1);
-            request.addProperty("Y1", y1);
-            request.addProperty("X2", x2);
-            request.addProperty("Y2", y2);
-
-            SoapSerializationEnvelope envelope =
-                    new SoapSerializationEnvelope(SoapEnvelope.VER11);
-            envelope.dotNet = true;
-            envelope.setOutputSoapObject(request);
-
-            HttpTransportSE httpTransport = new HttpTransportSE(URL);
-
-            httpTransport.call(SOAP_ACTION, envelope);
-
-            Object response = envelope.getResponse();
-            return response.toString();
-
-        } catch (Exception e) {
-            return "ERROR: " + e.toString();
-        }
-    }
-
     private void clearAllFields() {
         EditText[] fields = {binding.x1Val, binding.y1Val, binding.x2Val, binding.y2Val};
         for (EditText f : fields) {
@@ -166,19 +145,19 @@ public class PixelsFragment extends Fragment {
         return cs != null && cs.toString().trim().length() > 0;
     }
 
-    private Double parseNumber(String raw) {
+    private Integer parseNumber(String raw) {
         if (raw == null) return null;
         String trimmed = raw.trim();
         if (trimmed.isEmpty()) return null;
         try {
             Number n = NumberFormat.getNumberInstance(Locale.getDefault()).parse(trimmed);
-            return n.doubleValue();
+            return n.intValue();
         } catch (ParseException ignored) {
             return null;
         }
     }
 
-    private boolean checkRange(EditText field, Double val, double min, double max, String msg) {
+    private boolean checkRange(EditText field, Integer val, double min, double max, String msg) {
         if (val == null || val < min || val > max) {
             field.setError(msg);
             field.setBackgroundTintList(ERROR_TINT);
