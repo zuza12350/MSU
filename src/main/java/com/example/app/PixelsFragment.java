@@ -4,7 +4,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +18,10 @@ import androidx.fragment.app.Fragment;
 import com.example.app.databinding.LayoutPixelsBinding;
 import com.example.app.utils.CityMapService;
 import com.example.app.utils.SimpleWatcher;
-
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.serialization.PropertyInfo;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpTransportSE;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.Locale;
 
 public class PixelsFragment extends Fragment {
@@ -73,6 +66,7 @@ public class PixelsFragment extends Fragment {
 
     private void onSendClicked(View view) {
         boolean allFilled = allFieldsFilled();
+        validateFields();
 
         if (!allFilled) {
             highlightEmptyFields();
@@ -80,7 +74,6 @@ public class PixelsFragment extends Fragment {
             return;
         }
 
-        validateFields();
     }
 
     private boolean allFieldsFilled() {
@@ -122,14 +115,44 @@ public class PixelsFragment extends Fragment {
                     .getInstance()
                     .getFragmentOfMap(x1, y1, x2, y2);
 
-            System.out.println("MESSAGE " + msg);
 
             requireActivity().runOnUiThread(() -> {
-                Log.d("SOAP", msg);
-                clearAllFields();
+                if (!msg.contains("ERROR")) {
+                    showOutputImage(msg);
+                }
             });
         }).start();
     }
+
+    private void showOutputImage(String msg) {
+
+        if (!msg.startsWith("ERROR")) {
+            try {
+                byte[] bytes = android.util.Base64.decode(msg, android.util.Base64.DEFAULT);
+
+                android.graphics.Bitmap bitmap =
+                        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+                binding.outputImage.setImageBitmap(bitmap);
+
+                clearAllFields();
+
+            } catch (Exception e) {
+                Toast.makeText(requireContext(),
+                        "Error decoding image", Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Error")
+                    .setMessage(msg)
+                    .setPositiveButton("OK", null)
+                    .show();
+        }
+
+    }
+
     private void clearAllFields() {
         EditText[] fields = {binding.x1Val, binding.y1Val, binding.x2Val, binding.y2Val};
         for (EditText f : fields) {

@@ -4,99 +4,103 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/coordOutputImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/footerLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <LinearLayout
-        android:id="@+id/pageCoordinates"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:clipToPadding="false"
-        android:gravity="center"
+        android:id="@+id/footerLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:layout_width="158dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="40dp"
-            android:text="Right corner"
-            android:textAppearance="@style/TabTextLarge"
-            android:textColor="#32A891" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/longitudeVal"
-            android:layout_width="280dp"
-            android:layout_height="52dp"
-            android:layout_marginBottom="12dp"
-            android:backgroundTint="@color/design_default_color_secondary"
-            android:hint="Longitude"
-            android:imeOptions="actionNext"
-            android:inputType="numberDecimal|numberSigned"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/latitudeVal"
-            android:layout_width="280dp"
-            android:layout_height="52dp"
-            android:layout_marginBottom="20dp"
-            android:backgroundTint="@color/design_default_color_secondary"
-            android:hint="Latitude"
-            android:imeOptions="actionDone"
-            android:inputType="numberDecimal|numberSigned"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="Right corner"
+                    android:textColor="#32A891"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="158dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="40dp"
-            android:text="Left corner"
-            android:textAppearance="@style/TabTextLarge"
-            android:textColor="#32A891" />
+                <EditText
+                    android:id="@+id/longitudeVal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Longitude"
+                    android:inputType="numberDecimal" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/longitudeLeftVal"
-            android:layout_width="280dp"
-            android:layout_height="52dp"
-            android:layout_marginBottom="12dp"
-            android:backgroundTint="@color/design_default_color_secondary"
-            android:hint="Longitude"
-            android:imeOptions="actionNext"
-            android:inputType="numberDecimal|numberSigned"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+                <EditText
+                    android:id="@+id/latitudeVal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Latitude"
+                    android:inputType="numberDecimal" />
+            </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/latitudeLeftVal"
-            android:layout_width="280dp"
-            android:layout_height="52dp"
-            android:layout_marginBottom="20dp"
-            android:backgroundTint="@color/design_default_color_secondary"
-            android:hint="Latitude"
-            android:imeOptions="actionDone"
-            android:inputType="numberDecimal|numberSigned"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="Left corner"
+                    android:textColor="#32A891"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/longitudeLeftVal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Longitude"
+                    android:inputType="numberDecimal" />
+
+                <EditText
+                    android:id="@+id/latitudeLeftVal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Latitude"
+                    android:inputType="numberDecimal" />
+            </LinearLayout>
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSendCoordinates"
-            app:backgroundTint="@null"
-            app:cornerRadius="26dp"
-            app:rippleColor="@android:color/white"
-            android:layout_width="200dp"
-            android:layout_height="53dp"
-            android:background="@drawable/rounded_button_green"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="8dp"
-            android:text="Send"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
-    </LinearLayout>
+            style="@style/RoundedGreenIconButton"
+            android:layout_width="match_parent"
+            android:layout_height="63dp"
+            android:layout_marginTop="12dp"
+            android:text="Find" />
 
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

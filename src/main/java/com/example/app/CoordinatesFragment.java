@@ -16,7 +16,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.app.databinding.LayoutCoordinatesBinding;
+import com.example.app.utils.CityMapService;
 import com.example.app.utils.SimpleWatcher;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -27,7 +29,7 @@ public class CoordinatesFragment extends Fragment {
 
     private LayoutCoordinatesBinding binding;
 
-    private static final Pattern COORD_PATTERN = Pattern.compile("^-?\\d{1,2}[.,]\\d{1,5}$");
+    private static final Pattern COORD_PATTERN = Pattern.compile("^-?\\d{1,2}[.,]\\d{1,6}$");
     private ColorStateList normalTint;
     private static final ColorStateList ERROR_TINT = ColorStateList.valueOf(Color.RED);
 
@@ -49,7 +51,7 @@ public class CoordinatesFragment extends Fragment {
         );
 
         binding.btnSendCoordinates.setEnabled(false);
-        binding.btnSendCoordinates.setAlpha(.5f);
+        binding.btnSendCoordinates.setAlpha(.6f);
 
         TextWatcher watcher = new SimpleWatcher(this::toggleButtonEnabled);
         binding.latitudeVal.addTextChangedListener(watcher);
@@ -63,8 +65,8 @@ public class CoordinatesFragment extends Fragment {
     private void validateFields(View view) {
         boolean okRightLat = validateField(binding.latitudeVal);
         boolean okRightLon = validateField(binding.longitudeVal);
-        boolean okLeftLat  = validateField(binding.latitudeLeftVal);
-        boolean okLeftLon  = validateField(binding.longitudeLeftVal);
+        boolean okLeftLat = validateField(binding.latitudeLeftVal);
+        boolean okLeftLon = validateField(binding.longitudeLeftVal);
 
         if (!(okRightLat & okRightLon & okLeftLat & okLeftLon)) {
             return;
@@ -76,19 +78,53 @@ public class CoordinatesFragment extends Fragment {
         Double lLon = parseNumber(binding.longitudeLeftVal.getText().toString());
 
         boolean rangeOk = true;
-        rangeOk &= checkRange(binding.latitudeVal,  rLat, -90, 90,  "Latitude range -90..90");
-        rangeOk &= checkRange(binding.longitudeVal, rLon, -180, 180,"Longitude range -180..180");
-        rangeOk &= checkRange(binding.latitudeLeftVal,  lLat, -90, 90,  "Latitude range -90..90");
-        rangeOk &= checkRange(binding.longitudeLeftVal, lLon, -180, 180,"Longitude range -180..180");
+        rangeOk &= checkRange(binding.latitudeVal, rLat, -90, 90, "Latitude range -90..90");
+        rangeOk &= checkRange(binding.longitudeVal, rLon, -180, 180, "Longitude range -180..180");
+        rangeOk &= checkRange(binding.latitudeLeftVal, lLat, -90, 90, "Latitude range -90..90");
+        rangeOk &= checkRange(binding.longitudeLeftVal, lLon, -180, 180, "Longitude range -180..180");
         if (!rangeOk) return;
 
-        String msg = String.format(Locale.getDefault(),
-                "Right corner:  Lat %.5f, Lon %.5f\nLeft corner:   Lat %.5f, Lon %.5f",
-                rLat, rLon, lLat, lLon);
-        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+        new Thread(() -> {
+            String msg = CityMapService
+                    .getInstance()
+                    .getFragmentOfMapByCoordinate(rLat, rLon, lLat, lLon);
 
-        // TODO: send to endpoint
-        clearAllFields();
+
+            requireActivity().runOnUiThread(() -> {
+                if (!msg.contains("ERROR")) {
+                    showOutputImage(msg);
+                }
+            });
+        }).start();
+
+    }
+
+    private void showOutputImage(String msg) {
+        if (!msg.startsWith("ERROR")) {
+            try {
+                byte[] bytes = android.util.Base64.decode(msg, android.util.Base64.DEFAULT);
+
+                android.graphics.Bitmap bitmap =
+                        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+                binding.coordOutputImage.setImageBitmap(bitmap);
+
+                clearAllFields();
+
+            } catch (Exception e) {
+                Toast.makeText(requireContext(),
+                        "Error decoding image", Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Error")
+                    .setMessage(msg)
+                    .setPositiveButton("OK", null)
+                    .show();
+        }
+
     }
 
     private void clearAllFields() {
@@ -104,7 +140,7 @@ public class CoordinatesFragment extends Fragment {
             f.setBackgroundTintList(normalTint);
         }
         binding.btnSendCoordinates.setEnabled(false);
-        binding.btnSendCoordinates.setAlpha(.5f);
+        binding.btnSendCoordinates.setAlpha(.6f);
     }
 
     private void toggleButtonEnabled() {
@@ -115,7 +151,7 @@ public class CoordinatesFragment extends Fragment {
                         notEmpty(binding.longitudeLeftVal);
 
         binding.btnSendCoordinates.setEnabled(allFilled);
-        binding.btnSendCoordinates.setAlpha(allFilled ? 1f : .5f);
+        binding.btnSendCoordinates.setAlpha(allFilled ? 1f : .6f);
     }
 
     private boolean notEmpty(EditText e) {
@@ -127,7 +163,7 @@ public class CoordinatesFragment extends Fragment {
         String s = field.getText() == null ? "" : field.getText().toString().trim();
         boolean ok = COORD_PATTERN.matcher(s).matches();
         if (!ok) {
-            field.setError("Format: 5 digits after comma");
+            field.setError("Format: 6 digits after comma");
             field.setBackgroundTintList(ERROR_TINT);
         } else {
             field.setError(null);

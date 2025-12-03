@@ -2,6 +2,7 @@ package com.example.app.utils;
 
 import android.util.Log;
 
+
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
@@ -25,11 +26,8 @@ public class CityMapService {
 
     private static final String NAMESPACE = "http://citymapsoap.com/service/";
     private static final int TIMEOUT_MS = 60_000;
-    private static final String METHOD_NAME = "GetFragmentOfMap";
     private static CityMapService instance;
 
-    private CityMapService() {
-    }
 
     public static synchronized CityMapService getInstance() {
         if (instance == null) {
@@ -44,7 +42,7 @@ public class CityMapService {
         http.debug = true;
 
         try {
-            SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+            SoapObject request = new SoapObject(NAMESPACE, "GetFragmentOfMap");
 
             request.addProperty(makeIntProp("X1", x1));
             request.addProperty(makeIntProp("Y1", y1));
@@ -59,7 +57,6 @@ public class CityMapService {
             envelope.setAddAdornments(false);
             envelope.setOutputSoapObject(request);
 
-            // brak SOAPAction → null
             http.call(null, envelope);
 
             String xml = http.responseDump;
@@ -81,7 +78,8 @@ public class CityMapService {
             Log.e(TAG, "SOAP ERROR", e);
             Log.d(TAG, "REQUEST DUMP:\n" + http.requestDump);
             Log.d(TAG, "RESPONSE DUMP:\n" + http.responseDump);
-            return "ERROR: " + e.toString();
+
+            return "ERROR: " + e;
         }
     }
 
@@ -94,46 +92,45 @@ public class CityMapService {
         return pi;
     }
 
-    public String doGet(Map<String, String> queryParams) throws IOException {
-        StringBuilder urlBuilder = new StringBuilder(BASE_URL);
+    public String getInitialMap() {
+        HttpTransportSE http = new HttpTransportSE(BASE_URL, TIMEOUT_MS);
+        http.debug = true;
 
-        if (queryParams != null && !queryParams.isEmpty()) {
-            urlBuilder.append("?");
-            boolean first = true;
-            for (Map.Entry<String, String> e : queryParams.entrySet()) {
-                if (!first) urlBuilder.append("&");
-                first = false;
-                urlBuilder
-                        .append(e.getKey())
-                        .append("=")
-                        .append(e.getValue());
+        try {
+            SoapObject request = new SoapObject(NAMESPACE, "GetInitialMap");
+
+            SoapSerializationEnvelope envelope =
+                    new SoapSerializationEnvelope(SoapEnvelope.VER11);
+
+            envelope.dotNet = false;
+            envelope.implicitTypes = true;
+            envelope.setAddAdornments(false);
+            envelope.setOutputSoapObject(request);
+
+            http.call(null, envelope);
+
+            String xml = http.responseDump;
+            Log.d(TAG, "RESPONSE (GetInitialMap):\n" + xml);
+
+            String startTag = "<ImageInBase64>";
+            String endTag = "</ImageInBase64>";
+
+            int start = xml.indexOf(startTag);
+            int end = xml.indexOf(endTag);
+
+            if (start == -1 || end == -1 || end <= start) {
+                return "ERROR: tag ImageInBase64 not found";
             }
+
+            return xml.substring(start + startTag.length(), end).trim();
+
+        } catch (Exception e) {
+            Log.e(TAG, "SOAP ERROR (GetInitialMap)", e);
+            Log.d(TAG, "REQUEST DUMP:\n" + http.requestDump);
+            Log.d(TAG, "RESPONSE DUMP:\n" + http.responseDump);
+
+            return "ERROR: " + e;
         }
-
-        URL url = new URL(urlBuilder.toString());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(TIMEOUT_MS);
-        conn.setConnectTimeout(TIMEOUT_MS);
-        conn.setRequestMethod("GET");
-
-        return readResponse(conn);
-    }
-
-    public String doPost(String body, String contentType) throws IOException {
-        URL url = new URL(BASE_URL);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(TIMEOUT_MS);
-        conn.setConnectTimeout(TIMEOUT_MS);
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", contentType);
-
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(body.getBytes(StandardCharsets.UTF_8));
-            os.flush();
-        }
-
-        return readResponse(conn);
     }
 
     private String readResponse(HttpURLConnection conn) throws IOException {
@@ -154,5 +151,60 @@ public class CityMapService {
 
         Log.d(TAG, "HTTP " + code + " RESPONSE:\n" + sb.toString());
         return sb.toString();
+    }
+
+    public String getFragmentOfMapByCoordinate(Double rLat, Double rLon, Double lLat, Double lLon) {
+        HttpTransportSE http = new HttpTransportSE(BASE_URL, TIMEOUT_MS);
+        http.debug = true;
+
+        try {
+            SoapObject request = new SoapObject(NAMESPACE, "GetFragmentOfMapUsingGeoCoordinates");
+
+            request.addProperty(makeStringProp("Lat1", String.valueOf(rLat)));
+            request.addProperty(makeStringProp("Lon1", String.valueOf(rLon)));
+            request.addProperty(makeStringProp("Lat2", String.valueOf(lLat)));
+            request.addProperty(makeStringProp("Lon2", String.valueOf(lLon)));
+
+            SoapSerializationEnvelope envelope =
+                    new SoapSerializationEnvelope(SoapEnvelope.VER11);
+
+            envelope.dotNet = false;
+            envelope.implicitTypes = true;
+            envelope.setAddAdornments(false);
+            envelope.setOutputSoapObject(request);
+
+            http.call(null, envelope);
+
+            String xml = http.responseDump;
+            Log.d(TAG, "RESPONSE:\n" + xml);
+
+            String startTag = "<ImageInBase64>";
+            String endTag = "</ImageInBase64>";
+
+            int start = xml.indexOf(startTag);
+            int end = xml.indexOf(endTag);
+
+            if (start == -1 || end == -1 || end <= start) {
+                return "ERROR: tag ImageInBase64 not found";
+            }
+
+            return xml.substring(start + startTag.length(), end).trim();
+
+        } catch (Exception e) {
+            Log.e(TAG, "SOAP ERROR", e);
+            Log.d(TAG, "REQUEST DUMP:\n" + http.requestDump);
+            Log.d(TAG, "RESPONSE DUMP:\n" + http.responseDump);
+
+            return "ERROR: " + e;
+        }
+    }
+
+    private PropertyInfo makeStringProp(String name, String value) {
+        PropertyInfo pi = new PropertyInfo();
+        pi.setName(name);
+        pi.setNamespace(NAMESPACE);
+        pi.setValue(value);
+        pi.setType(String.class);
+        return pi;
     }
 }

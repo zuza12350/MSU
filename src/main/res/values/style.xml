@@ -1,7 +1,22 @@
 <resources>
 
-    <style name="TabTextLarge">
+    <style name="RoundedGreenIconButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@drawable/rounded_button_green</item>
+        <item name="backgroundTint">@null</item>
+
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textAllCaps">false</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:gravity">center</item>
+
+        <item name="icon">@drawable/loupe</item>
+        <item name="iconTint">@android:color/white</item>
+        <item name="iconSize">22dp</item>
+
+        <item name="iconPadding">10dp</item>
+
+        <item name="iconGravity">textEnd</item>
     </style>
+
 </resources>
 

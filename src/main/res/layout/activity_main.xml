@@ -18,7 +18,6 @@
         app:tabIndicatorFullWidth="true"
         app:tabMode="fixed"
         app:tabSelectedTextColor="#32a891"
-        app:tabTextAppearance="@style/TabTextLarge"
         app:tabTextColor="@color/common_google_signin_btn_text_light" />
 
     <FrameLayout
