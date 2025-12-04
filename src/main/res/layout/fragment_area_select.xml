@@ -7,17 +7,15 @@
     android:padding="12dp">
 
     <ImageView
-        android:id="@+id/mapImage"
+        android:id="@+id/previewImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:src="@drawable/city_1000" />
+        android:scaleType="fitCenter" />
 
     <com.example.app.RectOverlayView
         android:id="@+id/overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="399dp"
+        android:layout_height="620dp"
         android:clickable="false" />
 
     <LinearLayout
@@ -32,8 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Select points: upper left, down right"
-            android:textSize="14sp"
-            android:textColor="#555" />
+            android:textColor="#555"
+            android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConfirmArea"
